@@ -2,7 +2,7 @@
 
 namespace WebApi.Models
 {
-    public class User : IdentityUser
+    public class UserRole : IdentityRole
     {
 
     }
