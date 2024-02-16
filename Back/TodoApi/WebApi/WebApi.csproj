@@ -3,36 +3,38 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
 	<InvariantGlobalization>false</InvariantGlobalization>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>63c6af6d-d42e-40f1-984a-8a9c15801d0a</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\Migrations\**" />
     <Compile Remove="DbContext\**" />
+    <Content Remove="Data\Migrations\**" />
     <Content Remove="DbContext\**" />
+    <EmbeddedResource Remove="Data\Migrations\**" />
     <EmbeddedResource Remove="DbContext\**" />
+    <None Remove="Data\Migrations\**" />
     <None Remove="DbContext\**" />
   </ItemGroup>
 
   
 
   <ItemGroup>
-    <Folder Include="Controllers\ManageUserController\" />
-    <Folder Include="Data\Migrations\" />
-    <Folder Include="Models\" />
+    <Folder Include="Migrations\" />
     <Folder Include="Services\Implementations\" />
   </ItemGroup>
 
   
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
