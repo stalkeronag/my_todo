@@ -9,23 +9,23 @@ namespace WebApi.Controllers.ManageUserController
     {
         [Authorize(Roles = "Admin")]
         [HttpDelete("delete_user")]
-        public void DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
-
+            return Ok(id);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost("add_user")]
-        public void AddUser(int id)
+        public async Task<IActionResult> AddUser(int id)
         {
-
+            return Ok(id);
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost("bun_user")]
-        public void BunUser(int id)
+        public async Task<IActionResult> BunUser(int id)
         {
-
+            return Ok(id);
         }
     }
 }
