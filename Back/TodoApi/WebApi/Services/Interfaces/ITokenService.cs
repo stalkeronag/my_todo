@@ -1,9 +1,11 @@
-﻿namespace WebApi.Services.Interfaces
+﻿using WebApi.Models;
+
+namespace WebApi.Services.Interfaces
 {
     public interface ITokenService
     {
-        public Task GenerateAccessToken();
+        public Task<string> GenerateAccessToken(User user, UserRole role);
 
-        public Task GenerateRefreshToken();
+        public Task<string> GenerateRefreshToken();
     }
 }

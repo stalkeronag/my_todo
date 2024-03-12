@@ -1,7 +1,11 @@
 
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting.Builder;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 using WebApi.Data;
 using WebApi.Extensions;
 using WebApi.Models;
@@ -30,7 +34,16 @@ namespace WebApi
         {
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("bearerAuth", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Description = "JWT Authorization header using the Bearer scheme."
+                });
+            });
         }
 
         public static void ConfigureDb(WebApplicationBuilder builder)
@@ -49,16 +62,31 @@ namespace WebApi
             }
 
             app.UseHttpsRedirection();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
 
         }
 
-        public static void ConfigureAuth()
+        public static void ConfigureAuth(WebApplicationBuilder builder)
         {
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
+                 AddJwtBearer(options =>
+                 {
+                     options.MapInboundClaims = false;
 
+                     options.TokenValidationParameters = new TokenValidationParameters
+                     {
+                         ValidateIssuer = true,
+                         ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+                         ValidateAudience = true,
+                         ValidAudience = builder.Configuration["JWT:ValidAudience"],
+                         ValidateLifetime = true,
+                         ValidateIssuerSigningKey = true,
+                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+                     };
+                 });
         }
     }
 }

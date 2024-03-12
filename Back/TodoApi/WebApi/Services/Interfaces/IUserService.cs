@@ -1,16 +1,22 @@
-﻿namespace WebApi.Services.Interfaces
+﻿using WebApi.Models;
+
+namespace WebApi.Services.Interfaces
 {
     public interface IUserService
     {
-        public void GetUser();
+        public Task<User> GetUserByEmail(string email);
 
-        public void AddUser();
+        public Task<IEnumerable<User>> GetAllUsersAsync();
 
-        public void UpdateUser();
+        public Task<User> GetUserById(string id);
 
-        public void DeleteUser();
+        public Task AddUser(User user);
 
-        public void BunUser();
+        public Task UpdateUserById(string id);
+
+        public Task DeleteUserById(string id);
+
+        public Task AddRoleInUserById(string id, string role = "user");
 
     }
 }
