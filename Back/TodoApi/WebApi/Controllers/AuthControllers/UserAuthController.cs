@@ -12,23 +12,24 @@ namespace WebApi.Controllers.AuthControllers
     {
         private IUserService userService;
 
-        private IAuthService authService;
-
+     
         private ITokenService tokenService;
 
-        public UserAuthController(IUserService userService, IAuthService authService, ITokenService tokenService)
+        public UserAuthController(IUserService userService, ITokenService tokenService)
         {
             this.userService = userService;
-            this.authService = authService;
             this.tokenService = tokenService;
         }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
+            UserRole role = new UserRole()
+            {
+                Name = "admin"
+            };
             User currentUser = await userService.GetUserByEmail(loginDto.Email);
-
-            string accessToken = await tokenService.GenerateAccessToken(currentUser, null);
+            string accessToken = await tokenService.GenerateAccessToken(currentUser, role);
             return Ok(accessToken);
         }
 
@@ -36,10 +37,7 @@ namespace WebApi.Controllers.AuthControllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register(RegisterDto registerDto)
         {
-            User currentUser = await userService.GetUserByEmail(registerDto.Email);
-            await userService.AddUser(currentUser);
-            await userService.AddRoleInUserById(currentUser.Id);
-            return Ok(registerDto);
+            return null;
         }
     }
 }

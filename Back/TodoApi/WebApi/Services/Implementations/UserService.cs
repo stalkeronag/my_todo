@@ -12,9 +12,10 @@ namespace WebApi.Services.Implementations
         private UserManager<User> userManager;
 
 
-        public UserService(AppDbContext context)
+        public UserService(AppDbContext context, UserManager<User> userManager)
         {
             this.context = context;
+            this.userManager = userManager;
         }
 
         public Task AddRoleInUserById(string id, string role = "user")
@@ -43,7 +44,7 @@ namespace WebApi.Services.Implementations
 
         public Task<User> GetUserByEmail(string email)
         {
-            throw new NotImplementedException();
+            return userManager.FindByEmailAsync(email);
         }
 
         public Task<User> GetUserById(string id)

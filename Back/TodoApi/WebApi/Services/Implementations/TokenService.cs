@@ -27,7 +27,6 @@ namespace WebApi.Services.Implementations
                 issuer: configuration["Jwt:ValidIssuer"],
                 audience: configuration["Jwt:ValidAudience"],
                 claims: userClaims,
-                notBefore: DateTime.Now,
                 expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(10)),
                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])), SecurityAlgorithms.HmacSha256)
                 );

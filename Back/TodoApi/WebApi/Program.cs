@@ -9,6 +9,8 @@ using System.Text;
 using WebApi.Data;
 using WebApi.Extensions;
 using WebApi.Models;
+using WebApi.Services.Implementations;
+using WebApi.Services.Interfaces;
 
 namespace WebApi
 {
@@ -26,6 +28,14 @@ namespace WebApi
 
             ConfigurePipeline(app);
 
+            
+            var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<UserRole>>();
+            
+            Seeder.Seed(userManager, roleManager, context);
             app.Run();
         }
 
@@ -44,6 +54,9 @@ namespace WebApi
                     Description = "JWT Authorization header using the Bearer scheme."
                 });
             });
+
+            builder.Services.AddTransient<IUserService, UserService>();
+            builder.Services.AddTransient<ITokenService, TokenService>();
         }
 
         public static void ConfigureDb(WebApplicationBuilder builder)
@@ -60,11 +73,9 @@ namespace WebApi
                 app.UseSwaggerUI();
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseHttpsRedirection();
             app.MapControllers();
 
         }

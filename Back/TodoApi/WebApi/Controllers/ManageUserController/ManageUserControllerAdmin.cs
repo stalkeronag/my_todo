@@ -7,7 +7,7 @@ namespace WebApi.Controllers.ManageUserController
     [ApiController]
     public class ManageUserControllerAdmin : Controller
     {
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "admin")]
         [HttpDelete("delete_user")]
         public async Task<IActionResult> DeleteUser(int id)
         {
