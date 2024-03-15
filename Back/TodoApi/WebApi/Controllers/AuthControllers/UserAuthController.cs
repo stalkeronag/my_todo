@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Dto;
 using WebApi.Models;
@@ -12,24 +13,26 @@ namespace WebApi.Controllers.AuthControllers
     {
         private IUserService userService;
 
-     
+        private IMapper mapper;
+
         private ITokenService tokenService;
 
-        public UserAuthController(IUserService userService, ITokenService tokenService)
+        private IUserRoleService roleService;
+
+        public UserAuthController(IUserService userService, ITokenService tokenService, IUserRoleService roleService, IMapper mapper)
         {
             this.userService = userService;
             this.tokenService = tokenService;
+            this.roleService = roleService;
+            this.mapper = mapper;
         }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            UserRole role = new UserRole()
-            {
-                Name = "admin"
-            };
             User currentUser = await userService.GetUserByEmail(loginDto.Email);
-            string accessToken = await tokenService.GenerateAccessToken(currentUser, role);
+            var role = roleService.GetRolesByUserId(currentUser.Id).First();
+            string accessToken = tokenService.GenerateAccessToken(currentUser, role);
             return Ok(accessToken);
         }
 
@@ -37,7 +40,19 @@ namespace WebApi.Controllers.AuthControllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register(RegisterDto registerDto)
         {
-            return null;
+            var registerUser = await userService.GetUserByEmail(registerDto.Email);
+
+            if (registerUser != null)
+            {
+                return BadRequest("such user exist");
+            } else
+            {
+                var user = mapper.Map<User>(registerDto);
+                await userService.AddUser(user, registerDto.Password);
+                return Ok();
+            }
+
+
         }
     }
 }
