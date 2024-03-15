@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using WebApi.Data;
 using WebApi.Models;
 using WebApi.Services.Interfaces;
 
@@ -11,12 +12,15 @@ namespace WebApi.Services.Implementations
     {
         private readonly IConfiguration configuration;
 
-        public TokenService(IConfiguration configuration)
+        private readonly AppDbContext context;
+
+        public TokenService(IConfiguration configuration, AppDbContext context)
         {
             this.configuration = configuration;
+            this.context = context;
         }
 
-        public Task<string> GenerateAccessToken(User user, UserRole role)
+        public string GenerateAccessToken(User user, UserRole role)
         {
             var date = DateTime.Now;
             var userClaims = new List<Claim>();
@@ -31,10 +35,10 @@ namespace WebApi.Services.Implementations
                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])), SecurityAlgorithms.HmacSha256)
                 );
 
-            return Task<string>.FromResult(new JwtSecurityTokenHandler().WriteToken(jwt));
+            return new JwtSecurityTokenHandler().WriteToken(jwt);
         }
 
-        public Task<string> GenerateRefreshToken()
+        public string GenerateRefreshToken()
         {
             throw new NotImplementedException();
         }

@@ -1,5 +1,3 @@
-
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -8,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using WebApi.Data;
 using WebApi.Extensions;
+using WebApi.Mapping;
 using WebApi.Models;
 using WebApi.Services.Implementations;
 using WebApi.Services.Interfaces;
@@ -22,26 +21,25 @@ namespace WebApi
 
             ConfigureService(builder);
             ConfigureDb(builder);
+            ConfigureAuth(builder);
 
             var app = builder.Build();
-            
 
-            ConfigurePipeline(app);
-
-            
             var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<UserRole>>();
-            
             Seeder.Seed(userManager, roleManager, context);
+
+            ConfigurePipeline(app);   
             app.Run();
         }
 
 
         public static void ConfigureService(WebApplicationBuilder builder)
         {
+            builder.Services.AddAutoMapper(typeof(UserProfile));
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
@@ -53,10 +51,22 @@ namespace WebApi
                     BearerFormat = "JWT",
                     Description = "JWT Authorization header using the Bearer scheme."
                 });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "bearerAuth" }
+                        },
+                        new string[] {}
+                    }
+                });
             });
 
             builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<ITokenService, TokenService>();
+            builder.Services.AddTransient<IUserRoleService, UserRoleService>();
+            builder.Services.AddHttpContextAccessor();
         }
 
         public static void ConfigureDb(WebApplicationBuilder builder)
@@ -67,25 +77,30 @@ namespace WebApi
      
         public static void ConfigurePipeline(WebApplication app)
         {
+            
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
                 app.UseDeveloperExceptionPage();
             }
+            app.UseHttpsRedirection();
+
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseHttpsRedirection();
-            app.MapControllers();
+            app.MapControllers(); 
+            
 
         }
 
         public static void ConfigureAuth(WebApplicationBuilder builder)
         {
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).
-                 AddJwtBearer(options =>
-                 {
-                     options.MapInboundClaims = false;
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+               {
 
                      options.TokenValidationParameters = new TokenValidationParameters
                      {

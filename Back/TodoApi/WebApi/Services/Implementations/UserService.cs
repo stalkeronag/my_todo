@@ -18,15 +18,24 @@ namespace WebApi.Services.Implementations
             this.userManager = userManager;
         }
 
-        public Task AddRoleInUserById(string id, string role = "user")
+        public async Task AddRoleInUserById(string id, string role = "user")
         {
-            throw new NotImplementedException();
+            User currentUser = context.Users.Where(user => user.Id.Equals(id)).FirstOrDefault();
+
+            if (currentUser != null)
+            {
+                await userManager.AddToRoleAsync(currentUser, role);
+                await context.SaveChangesAsync();
+            } 
         }
 
-        public async Task AddUser(User user)
+        public async Task AddUser(User user, string password)
         {
+            await userManager.AddPasswordAsync(user, password);
             await userManager.CreateAsync(user);
             await context.SaveChangesAsync();
+            var currentUser = await userManager.FindByEmailAsync(user.Email);
+            await AddRoleInUserById(currentUser.Id);   
         }
 
         public async Task DeleteUserById(string id)
