@@ -12,19 +12,22 @@ namespace WebApi.Services.Implementations
     {
         private readonly IConfiguration configuration;
 
+        private readonly IHttpContextAccessor httpContextAccessor;
+
         private readonly AppDbContext context;
 
-        public TokenService(IConfiguration configuration, AppDbContext context)
+        public TokenService(IConfiguration configuration, AppDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             this.configuration = configuration;
             this.context = context;
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         public string GenerateAccessToken(User user, UserRole role)
         {
             var date = DateTime.Now;
             var userClaims = new List<Claim>();
-            userClaims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
+            userClaims.Add(new Claim("user_id", user.Id));
             userClaims.Add(new Claim(JwtRegisteredClaimNames.Name, user.UserName));
             userClaims.Add(new Claim(ClaimsIdentity.DefaultRoleClaimType, role.Name));
             var jwt = new JwtSecurityToken(
@@ -40,7 +43,14 @@ namespace WebApi.Services.Implementations
 
         public string GenerateRefreshToken()
         {
-            throw new NotImplementedException();
+            return GenerateId();
+        }
+
+        private string GenerateId()
+        {
+            var ticks = DateTime.Now.Ticks;
+            var guid = Guid.NewGuid().ToString();
+            return ticks + guid;
         }
     }
 }
