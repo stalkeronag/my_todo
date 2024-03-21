@@ -1,4 +1,5 @@
-﻿using WebApi.Services.Interfaces;
+﻿using WebApi.Models;
+using WebApi.Services.Interfaces;
 
 namespace WebApi.Services.Implementations
 {

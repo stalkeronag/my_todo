@@ -6,6 +6,12 @@ namespace WebApi.Data
 {
     public class AppDbContext : IdentityDbContext<User, UserRole, string>
     {
+        public DbSet<RefreshToken> refreshTokens { get; set; }
+
+        public DbSet<RefreshTokenSession> refreshTokenSessions { get; set; }
+
+        public DbSet<FingerPrint> fingerPrints { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {

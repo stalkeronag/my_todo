@@ -1,9 +1,9 @@
-﻿namespace WebApi.Services.Interfaces
+﻿using WebApi.Models;
+
+namespace WebApi.Services.Interfaces
 {
     public interface IAuthService
     {
-        public Task SignIn();
-
-        public Task SignOut();
+        public Task<User> GetCurrentUser();
     }
 }

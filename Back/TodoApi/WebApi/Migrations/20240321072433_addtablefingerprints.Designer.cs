@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebApi.Data;
@@ -11,9 +12,11 @@ using WebApi.Data;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240321072433_addtablefingerprints")]
+    partial class addtablefingerprints
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,15 +139,10 @@ namespace WebApi.Migrations
                     b.Property<string>("Referer")
                         .HasColumnType("text");
 
-                    b.Property<string>("RefreshTokenSessionId")
-                        .HasColumnType("text");
-
                     b.Property<string>("UserAgent")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RefreshTokenSessionId");
 
                     b.ToTable("fingerPrints");
                 });
@@ -176,6 +174,9 @@ namespace WebApi.Migrations
             modelBuilder.Entity("WebApi.Models.RefreshTokenSession", b =>
                 {
                     b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Fingerprint")
                         .HasColumnType("text");
 
                     b.Property<string>("UserId")
@@ -329,13 +330,6 @@ namespace WebApi.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("WebApi.Models.FingerPrint", b =>
-                {
-                    b.HasOne("WebApi.Models.RefreshTokenSession", null)
-                        .WithMany("Fingerprint")
-                        .HasForeignKey("RefreshTokenSessionId");
-                });
-
             modelBuilder.Entity("WebApi.Models.RefreshToken", b =>
                 {
                     b.HasOne("WebApi.Models.RefreshTokenSession", null)
@@ -354,8 +348,6 @@ namespace WebApi.Migrations
 
             modelBuilder.Entity("WebApi.Models.RefreshTokenSession", b =>
                 {
-                    b.Navigation("Fingerprint");
-
                     b.Navigation("refreshTokens");
                 });
 #pragma warning restore 612, 618

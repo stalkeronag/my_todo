@@ -6,6 +6,6 @@ namespace WebApi.Services.Interfaces
     {
         public string GenerateAccessToken(User user, UserRole role);
 
-        public string GenerateRefreshToken();
+        public string GenerateRefreshToken(User user);
     }
 }
