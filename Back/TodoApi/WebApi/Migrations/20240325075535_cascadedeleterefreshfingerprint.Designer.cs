@@ -12,8 +12,8 @@ using WebApi.Data;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240319190959_RefreshTokenSession")]
-    partial class RefreshTokenSession
+    [Migration("20240325075535_cascadedeleterefreshfingerprint")]
+    partial class cascadedeleterefreshfingerprint
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -131,9 +131,36 @@ namespace WebApi.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("WebApi.Models.FingerPrint", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Hash")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Referer")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RefreshTokenSessionId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RefreshTokenSessionId");
+
+                    b.ToTable("fingerPrints");
+                });
+
             modelBuilder.Entity("WebApi.Models.RefreshToken", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("Created")
@@ -142,29 +169,53 @@ namespace WebApi.Migrations
                     b.Property<DateTime>("Expires")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("RefreshTokenSessionId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Token")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RefreshTokenSessionId");
+
                     b.ToTable("refreshTokens");
+                });
+
+            modelBuilder.Entity("WebApi.Models.RefreshTokenFingerprint", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HashFingerPrint")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RefreshTokenId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RefreshTokenId");
+
+                    b.ToTable("refreshTokenFingerprints");
                 });
 
             modelBuilder.Entity("WebApi.Models.RefreshTokenSession", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Fingerprint")
-                        .HasColumnType("text");
-
-                    b.Property<string>("RefreshTokenId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("text");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("refreshTokenSessions");
                 });
@@ -308,6 +359,57 @@ namespace WebApi.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("WebApi.Models.FingerPrint", b =>
+                {
+                    b.HasOne("WebApi.Models.RefreshTokenSession", "RefreshTokenSession")
+                        .WithMany("Fingerprint")
+                        .HasForeignKey("RefreshTokenSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RefreshTokenSession");
+                });
+
+            modelBuilder.Entity("WebApi.Models.RefreshToken", b =>
+                {
+                    b.HasOne("WebApi.Models.RefreshTokenSession", "RefreshTokenSession")
+                        .WithMany("refreshTokens")
+                        .HasForeignKey("RefreshTokenSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RefreshTokenSession");
+                });
+
+            modelBuilder.Entity("WebApi.Models.RefreshTokenFingerprint", b =>
+                {
+                    b.HasOne("WebApi.Models.RefreshToken", "RefreshToken")
+                        .WithMany()
+                        .HasForeignKey("RefreshTokenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RefreshToken");
+                });
+
+            modelBuilder.Entity("WebApi.Models.RefreshTokenSession", b =>
+                {
+                    b.HasOne("WebApi.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WebApi.Models.RefreshTokenSession", b =>
+                {
+                    b.Navigation("Fingerprint");
+
+                    b.Navigation("refreshTokens");
                 });
 #pragma warning restore 612, 618
         }

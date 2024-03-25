@@ -21,13 +21,33 @@ namespace WebApi.Controllers.AuthControllers
 
         private IAuthService authService;
 
-        public UserAuthController(IUserService userService, ITokenService tokenService, IUserRoleService roleService, IMapper mapper, IAuthService authService)
+        private IRefreshTokenSessionService refreshTokenSessionService;
+
+        private IFingerprintService fingerprintService;
+
+        private IRefreshTokenSessionBuilderService refreshTokenSessionBuilderService;
+
+        private ITokenManagerService tokenManagerService;
+
+        public UserAuthController(IUserService userService, 
+            ITokenService tokenService, 
+            IUserRoleService roleService, 
+            IMapper mapper, 
+            IAuthService authService,
+            IRefreshTokenSessionService refreshTokenSessionService,
+            IFingerprintService fingerprintService,
+            IRefreshTokenSessionBuilderService refreshTokenSessionBuilderService,
+            ITokenManagerService tokenManagerService)
         {
             this.userService = userService;
             this.tokenService = tokenService;
             this.roleService = roleService;
             this.mapper = mapper;
             this.authService = authService;
+            this.refreshTokenSessionService = refreshTokenSessionService;
+            this.fingerprintService = fingerprintService;
+            this.refreshTokenSessionBuilderService = refreshTokenSessionBuilderService;
+            this.tokenManagerService = tokenManagerService;
         }
 
         [HttpPost("Login")]
@@ -36,12 +56,14 @@ namespace WebApi.Controllers.AuthControllers
             User currentUser = await userService.GetUserByEmail(loginDto.Email);
             var role = roleService.GetRolesByUserId(currentUser.Id).First();
             string accessToken = tokenService.GenerateAccessToken(currentUser, role);
-            string refreshToken = tokenService.GenerateRefreshToken(currentUser);
-            return Ok(new PairTokens()
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
-            });
+            var refreshToken = tokenService.GenerateRefreshToken();
+            tokenManagerService.SetRefreshToken(refreshToken);
+            tokenManagerService.SetAccessToken(accessToken);
+            var refreshSession = await refreshTokenSessionService.GetExistSessionOrCreate(currentUser);
+            refreshTokenSessionBuilderService.AddRefreshToken(refreshToken);
+            refreshTokenSessionBuilderService.AddFingerPrint(fingerprintService.GetFingerPrint(currentUser.Id));
+            await refreshTokenSessionBuilderService.Build(refreshSession);
+            return Ok();
         }
 
 

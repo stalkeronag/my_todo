@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Services.Interfaces;
 
 namespace WebApi.Controllers.ManageTodoTasksController
 {
@@ -9,17 +10,19 @@ namespace WebApi.Controllers.ManageTodoTasksController
     public class TasksController : Controller
     {
         private readonly IHttpContextAccessor _contextAccessor;
-        public TasksController(IHttpContextAccessor contextAccessor)
+
+        private readonly ITokenManagerService tokenManagerService;
+        public TasksController(IHttpContextAccessor contextAccessor, ITokenManagerService tokenManagerService)
         {
             this._contextAccessor = contextAccessor;
+            this.tokenManagerService = tokenManagerService;
         }
 
         [Authorize]
         [HttpGet("GetAllTasks")]
         public async Task<IActionResult> GetAllTasks()
         {
-            
-            return Ok("hello");
+            return Ok(_contextAccessor.HttpContext.Request.Cookies["refreshToken"]);
         }
 
         [HttpGet("GetAllDoneTasks")]

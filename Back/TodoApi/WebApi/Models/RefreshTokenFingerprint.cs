@@ -3,16 +3,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApi.Models
 {
-    public class RefreshTokenSession
+    public class RefreshTokenFingerprint
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
 
-        public List<RefreshToken> refreshTokens { get; set; }
-
-        public List<FingerPrint> Fingerprint { get; set; }
-
         [Required]
-        public User User { get; set; }
+        public RefreshToken RefreshToken { get; set; }
+
+        
+        public string HashFingerPrint { get; set; }
+
     }
 }

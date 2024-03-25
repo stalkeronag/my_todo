@@ -23,5 +23,15 @@ namespace WebApi.Services.Implementations
             User currentUser = context.Users.Where(user => user.Id == userId).FirstOrDefault();
             return Task.FromResult(currentUser);
         }
+
+        public Task SignIn()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SignOut()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

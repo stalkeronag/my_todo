@@ -12,6 +12,8 @@ namespace WebApi.Data
 
         public DbSet<FingerPrint> fingerPrints { get; set; }
 
+        public DbSet<RefreshTokenFingerprint> refreshTokenFingerprints { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {

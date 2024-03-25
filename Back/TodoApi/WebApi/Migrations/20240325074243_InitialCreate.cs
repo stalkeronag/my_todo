@@ -55,8 +55,7 @@ namespace WebApi.Migrations
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    Id = table.Column<int>(type: "integer", nullable: false),
                     RoleId = table.Column<string>(type: "text", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true)
@@ -76,8 +75,7 @@ namespace WebApi.Migrations
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    Id = table.Column<int>(type: "integer", nullable: false),
                     UserId = table.Column<string>(type: "text", nullable: false),
                     ClaimType = table.Column<string>(type: "text", nullable: true),
                     ClaimValue = table.Column<string>(type: "text", nullable: true)
@@ -157,6 +155,84 @@ namespace WebApi.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "refreshTokenSessions",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_refreshTokenSessions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_refreshTokenSessions_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "fingerPrints",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    UserAgent = table.Column<string>(type: "text", nullable: true),
+                    Referer = table.Column<string>(type: "text", nullable: true),
+                    Hash = table.Column<string>(type: "text", nullable: true),
+                    RefreshTokenSessionId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_fingerPrints", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_fingerPrints_refreshTokenSessions_RefreshTokenSessionId",
+                        column: x => x.RefreshTokenSessionId,
+                        principalTable: "refreshTokenSessions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "refreshTokens",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Token = table.Column<string>(type: "text", nullable: true),
+                    Expires = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Created = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    RefreshTokenSessionId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_refreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_refreshTokens_refreshTokenSessions_RefreshTokenSessionId",
+                        column: x => x.RefreshTokenSessionId,
+                        principalTable: "refreshTokenSessions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "refreshTokenFingerprints",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    RefreshTokenId = table.Column<string>(type: "text", nullable: true),
+                    HashFingerPrint = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_refreshTokenFingerprints", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_refreshTokenFingerprints_refreshTokens_RefreshTokenId",
+                        column: x => x.RefreshTokenId,
+                        principalTable: "refreshTokens",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -193,6 +269,26 @@ namespace WebApi.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_fingerPrints_RefreshTokenSessionId",
+                table: "fingerPrints",
+                column: "RefreshTokenSessionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_refreshTokenFingerprints_RefreshTokenId",
+                table: "refreshTokenFingerprints",
+                column: "RefreshTokenId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_refreshTokens_RefreshTokenSessionId",
+                table: "refreshTokens",
+                column: "RefreshTokenSessionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_refreshTokenSessions_UserId",
+                table: "refreshTokenSessions",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -214,7 +310,19 @@ namespace WebApi.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "fingerPrints");
+
+            migrationBuilder.DropTable(
+                name: "refreshTokenFingerprints");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "refreshTokens");
+
+            migrationBuilder.DropTable(
+                name: "refreshTokenSessions");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

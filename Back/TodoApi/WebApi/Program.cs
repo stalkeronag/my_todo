@@ -66,7 +66,12 @@ namespace WebApi
             builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<ITokenService, TokenService>();
             builder.Services.AddTransient<IUserRoleService, UserRoleService>();
+            builder.Services.AddTransient<IAuthService, AuthService>();
+            builder.Services.AddTransient<IRefreshTokenSessionService, RefreshTokenService>();
+            builder.Services.AddTransient<IFingerprintService, FingerPrintService>();
             builder.Services.AddHttpContextAccessor();
+            builder.Services.AddTransient<IRefreshTokenSessionBuilderService, RefreshTokenSessionBuilderService>();
+            builder.Services.AddTransient<ITokenManagerService, TokenManagerService>();
         }
 
         public static void ConfigureDb(WebApplicationBuilder builder)
